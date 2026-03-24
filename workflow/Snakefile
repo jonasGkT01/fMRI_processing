@@ -1,0 +1,16 @@
+configfile: "../config/config.yaml"
+
+include: "rules/ISC_correlation.smk"
+
+FILE_PATTERN = (
+    config["narratives_dataset_dir"]
+    + "/derivatives/afni-smooth/"
+    + "sub-{subject}/func/"
+    + "sub-{subject}_task-{task}{run_tag}_space-{space}_res-{resolution}_desc-{descriptor}_bold.nii.gz"
+)
+
+rule all:
+    input:
+        config["ISC_correlation"]
+    shell:
+        "snakemake --dag | dot -Tpng > ../results/dag.png"

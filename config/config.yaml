@@ -1,0 +1,20 @@
+ISC_correlation_input:  "../resources/derivatives/afni-smooth"
+ISC_correlation_output: "../results"
+
+# dataset configuration
+bold_glob_pattern: "../resources/sub-{subject}/func/sub-{subject}_task-{task}{run_tag}_space-{space}_res-{resolution}_desc-{descriptor}_bold.nii.gz"
+subjects:
+  start: 1
+  end: 345
+tasks:
+  - "pieman"
+run_tags:
+  - ""
+  - "_run-1"
+  - "_run-2"
+spaces:
+  - "MNI152NLin2009cAsym"
+resolutions:
+  - "native"
+descriptors:
+  - "clean"
