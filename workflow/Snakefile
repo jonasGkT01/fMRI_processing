@@ -1,16 +1,84 @@
-configfile: "../config/config.yaml"
+configfile: "config/config.yaml"
 
-include: "rules/ISC_correlation.smk"
+from pathlib import Path
+from itertools import product
 
-FILE_PATTERN = (
-    config["narratives_dataset_dir"]
-    + "/derivatives/afni-smooth/"
-    + "sub-{subject}/func/"
-    + "sub-{subject}_task-{task}{run_tag}_space-{space}_res-{resolution}_desc-{descriptor}_bold.nii.gz"
-)
+SUBJECTS = [f"{i:03d}" for i in range(config["subjects"]["start"], config["subjects"]["end"] + 1)]
+
+BOLD_FILES = []
+for subject, task, run_tag, space, resolution, descriptor in product(
+    SUBJECTS,
+    config["tasks"],
+    config["run_tags"],
+    config["spaces"],
+    config["resolutions"],
+    config["descriptors"],
+):
+    bold_file = config["bold_glob_pattern"].format(
+        subject=subject,
+        task=task,
+        run_tag=run_tag,
+        space=space,
+        resolution=resolution,
+        descriptor=descriptor,
+    )
+    if Path(bold_file).exists():
+        BOLD_FILES.append({
+            "subject": subject,
+            "task": task,
+            "run_tag": run_tag,
+            "space": space,
+            "resolution": resolution,
+            "descriptor": descriptor,
+            "bold_file": bold_file,
+        })
+
+print(f"Found {len(BOLD_FILES)} valid BOLD files")
+
+# group by task/run/space/resolution/descriptor
+GROUPS = {}
+for c in BOLD_FILES:
+    key = (
+        c["task"],
+        c["space"],
+        c["resolution"],
+        c["descriptor"],
+    )
+    GROUPS.setdefault(key, []).append(c)
+
+print(f"Found {len(GROUPS)} ISC groups")
+
+PARCEL_OUTPUTS = [
+    f"../results/parcels/sub-{c['subject']}_task-{c['task']}{c['run_tag']}_space-{c['space']}_res-{c['resolution']}_desc-{c['descriptor']}_parcel_ts.npy"
+    for c in BOLD_FILES
+]
+
+ISC_NPY_OUTPUTS = [
+    f"../results/isc/task-{task}_space-{space}_res-{resolution}_desc-{descriptor}_isc_mean.npy"
+    for (task, space, resolution, descriptor) in GROUPS
+]
+
+ISC_NII_OUTPUTS = [
+    f"../results/isc/task-{task}_space-{space}_res-{resolution}_desc-{descriptor}_isc_mean.nii.gz"
+    for (task, space, resolution, descriptor) in GROUPS
+]
+
+FIG_PNG_OUTPUTS = [
+    f"../results/figures/task-{task}_space-{space}_res-{resolution}_desc-{descriptor}_isc_mean.png"
+    for (task, space, resolution, descriptor) in GROUPS
+]
+
+FIG_HTML_OUTPUTS = [
+    f"../results/figures/task-{task}_space-{space}_res-{resolution}_desc-{descriptor}_isc_mean.html"
+    for (task, space, resolution, descriptor) in GROUPS
+]
 
 rule all:
     input:
-        config["ISC_correlation"]
+        PARCEL_OUTPUTS,
+        ISC_NPY_OUTPUTS,
+        ISC_NII_OUTPUTS,
+        FIG_PNG_OUTPUTS,
+        FIG_HTML_OUTPUTS
     shell:
-        "snakemake --dag | dot -Tpng > ../results/dag.png"
+        "snakemake --dag | dot -Tpng > ../dag.png"
