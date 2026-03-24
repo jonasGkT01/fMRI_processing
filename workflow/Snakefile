@@ -1,10 +1,15 @@
-configfile: "config/config.yaml"
+configfile: "../config/config.yaml"
+
+include: "rules/extract_parcels.smk"
+include: "rules/compute_isc.smk"
+include: "rules/plot_isc.smk"
 
 from pathlib import Path
 from itertools import product
 
 SUBJECTS = [f"{i:03d}" for i in range(config["subjects"]["start"], config["subjects"]["end"] + 1)]
 
+# Discover valid inputs
 BOLD_FILES = []
 for subject, task, run_tag, space, resolution, descriptor in product(
     SUBJECTS,
@@ -35,42 +40,36 @@ for subject, task, run_tag, space, resolution, descriptor in product(
 
 print(f"Found {len(BOLD_FILES)} valid BOLD files")
 
-# group by task/run/space/resolution/descriptor
-GROUPS = {}
+# Group by task only
+TASK_GROUPS = {}
 for c in BOLD_FILES:
-    key = (
-        c["task"],
-        c["space"],
-        c["resolution"],
-        c["descriptor"],
-    )
-    GROUPS.setdefault(key, []).append(c)
+    TASK_GROUPS.setdefault(c["task"], []).append(c)
 
-print(f"Found {len(GROUPS)} ISC groups")
+print(f"Found {len(TASK_GROUPS)} task groups")
 
 PARCEL_OUTPUTS = [
-    f"../results/parcels/sub-{c['subject']}_task-{c['task']}{c['run_tag']}_space-{c['space']}_res-{c['resolution']}_desc-{c['descriptor']}_parcel_ts.npy"
+    f"../results/parcels/{c['task']}/sub-{c['subject']}_task-{c['task']}{c['run_tag']}_space-{c['space']}_res-{c['resolution']}_desc-{c['descriptor']}_parcel_ts.npy"
     for c in BOLD_FILES
 ]
 
 ISC_NPY_OUTPUTS = [
-    f"../results/isc/task-{task}_space-{space}_res-{resolution}_desc-{descriptor}_isc_mean.npy"
-    for (task, space, resolution, descriptor) in GROUPS
+    f"../results/isc/task-{task}_isc_mean.npy"
+    for task in TASK_GROUPS
 ]
 
 ISC_NII_OUTPUTS = [
-    f"../results/isc/task-{task}_space-{space}_res-{resolution}_desc-{descriptor}_isc_mean.nii.gz"
-    for (task, space, resolution, descriptor) in GROUPS
+    f"../results/isc/task-{task}_isc_mean.nii.gz"
+    for task in TASK_GROUPS
 ]
 
 FIG_PNG_OUTPUTS = [
-    f"../results/figures/task-{task}_space-{space}_res-{resolution}_desc-{descriptor}_isc_mean.png"
-    for (task, space, resolution, descriptor) in GROUPS
+    f"../results/figures/task-{task}_isc_mean.png"
+    for task in TASK_GROUPS
 ]
 
 FIG_HTML_OUTPUTS = [
-    f"../results/figures/task-{task}_space-{space}_res-{resolution}_desc-{descriptor}_isc_mean.html"
-    for (task, space, resolution, descriptor) in GROUPS
+    f"../results/figures/task-{task}_isc_mean.html"
+    for task in TASK_GROUPS
 ]
 
 rule all:
@@ -80,5 +79,3 @@ rule all:
         ISC_NII_OUTPUTS,
         FIG_PNG_OUTPUTS,
         FIG_HTML_OUTPUTS
-    shell:
-        "snakemake --dag | dot -Tpng > ../dag.png"

@@ -16,7 +16,7 @@ resolutions:
 descriptors:
   - "clean"
 
-# mask configuration
+# atlas configuration
 atlas:
   n_rois: 200
   yeo_networks: 7

@@ -1,8 +1,10 @@
 rule plot_isc:
     input:
-        ISC_NII_OUTPUTS
+        isc_nii=f"../results/isc/task-{{task}}_isc_mean.nii.gz"
     output:
-        FIG_PNG_OUTPUTS,
-        FIG_HTML_OUTPUTS
+        png=f"../results/figures/task-{{task}}_isc_mean.png",
+        html=f"../results/figures/task-{{task}}_isc_mean.html"
+    conda:
+        "../envs/plot_isc_environment.yaml"
     script:
         "../scripts/plot_isc.py"
