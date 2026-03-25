@@ -5,6 +5,7 @@ subjects:
   end: 345
 tasks:
   - "pieman"
+  - "tunnel"
 run_tags:
   - ""
   - "_run-1"

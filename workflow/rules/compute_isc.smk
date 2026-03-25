@@ -1,7 +1,10 @@
+#TODO add numpy vector for each parcel
+#TODO  check if the average is computed over parcels or over voxels
+
 def task_parcel_inputs(wc):
     items = TASK_GROUPS[wc.task]
     return [
-        f"../results/parcels/sub-{c['subject']}_task-{c['task']}{c['run_tag']}_space-{c['space']}_res-{c['resolution']}_desc-{c['descriptor']}_parcel_ts.npy"
+        f"../results/parcels/{c['task']}/sub-{c['subject']}_task-{c['task']}{c['run_tag']}_space-{c['space']}_res-{c['resolution']}_desc-{c['descriptor']}_parcel_ts.npy"
         for c in items
     ]
 

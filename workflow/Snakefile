@@ -1,4 +1,4 @@
-configfile: "../config/config.yaml"
+configfile: "config/config.yaml"
 
 include: "rules/extract_parcels.smk"
 include: "rules/compute_isc.smk"
@@ -8,6 +8,9 @@ from pathlib import Path
 from itertools import product
 
 SUBJECTS = [f"{i:03d}" for i in range(config["subjects"]["start"], config["subjects"]["end"] + 1)]
+
+def run_label(run_tag):
+    return "norun" if run_tag == "" else run_tag.replace("_", "")
 
 # Discover valid inputs
 BOLD_FILES = []
@@ -32,23 +35,24 @@ for subject, task, run_tag, space, resolution, descriptor in product(
             "subject": subject,
             "task": task,
             "run_tag": run_tag,
+            "run_label": run_label(run_tag),
             "space": space,
             "resolution": resolution,
             "descriptor": descriptor,
             "bold_file": bold_file,
         })
 
-print(f"Found {len(BOLD_FILES)} valid BOLD files")
+print(f"Found {len(BOLD_FILES)} valid BOLD file(s)")
 
 # Group by task only
 TASK_GROUPS = {}
 for c in BOLD_FILES:
     TASK_GROUPS.setdefault(c["task"], []).append(c)
 
-print(f"Found {len(TASK_GROUPS)} task groups")
+print(f"Found {len(TASK_GROUPS)} task group(s)")
 
 PARCEL_OUTPUTS = [
-    f"../results/parcels/{c['task']}/sub-{c['subject']}_task-{c['task']}{c['run_tag']}_space-{c['space']}_res-{c['resolution']}_desc-{c['descriptor']}_parcel_ts.npy"
+    f"../results/parcels/{c['task']}/sub-{c['subject']}_task-{c['task']}_{run_label(c['run_tag'])}_space-{c['space']}_res-{c['resolution']}_desc-{c['descriptor']}_parcel_ts.npy"
     for c in BOLD_FILES
 ]
 

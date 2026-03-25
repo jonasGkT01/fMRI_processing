@@ -1,2 +1,3 @@
 .env
-workflow/.snakemake
+.snakemake/
+workflow/envs/fMRI_processing/

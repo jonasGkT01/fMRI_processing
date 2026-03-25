@@ -11,7 +11,7 @@ isc_nii = snakemake.output["isc_nii"]
 n_rois = snakemake.params["n_rois"]
 yeo_networks = snakemake.params["yeo_networks"]
 
-print(f"Computing ISC from {len(ts_files)} subjects")
+print(f"Computing ISC from {len(ts_files)} BOLD files with {n_rois} parcels each")
 
 # Load atlas
 atlas = datasets.fetch_atlas_schaefer_2018(
@@ -24,9 +24,14 @@ atlas_data = atlas_img.get_fdata().astype(int)
 # Load parcel data
 data = [np.load(f) for f in ts_files]
 
-# Handle mismatched time lengths (robust)
-min_T = min(x.shape[0] for x in data)
-data = np.stack([x[:min_T] for x in data])
+# Check that all files have the same number of timepoints
+time_lengths = [x.shape[0] for x in data]
+if len(set(time_lengths)) != 1:
+    details = ", ".join(
+        f"{f}: {arr.shape[0]} timepoints"
+        for f, arr in zip(ts_files, data)
+    )
+    raise ValueError(f"Mismatched time lengths across input files: {details}")
 
 n_subjects, T, n_parcels = data.shape
 print(f"Data shape: {n_subjects} subjects, {T} timepoints, {n_parcels} parcels")

@@ -1,4 +1,0 @@
-The flag 'directory' used in rule ISC_correlation is only valid for outputs, not inputs.
-KeyError in file "/home/molinerislab/LLMmind/snakemake/fMRI_processing/workflow/Snakefile", line 7:
-'ISC_correlation'
-  File "/home/molinerislab/LLMmind/snakemake/fMRI_processing/workflow/Snakefile", line 7, in <module>
