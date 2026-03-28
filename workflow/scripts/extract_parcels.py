@@ -2,34 +2,33 @@ import numpy as np
 from nilearn import datasets
 from nilearn.maskers import NiftiLabelsMasker
 
-# Snakemake inputs
+# inputs/outputs from Snakemake
 bold_file = snakemake.input["bold"]
 npy_file = snakemake.output["npy"]
 
+# parameters from Snakemake
 n_rois = snakemake.params["n_rois"]
 yeo_networks = snakemake.params["yeo_networks"]
+atlas_dir = snakemake.params["atlas_dir"]
 
 print(f"Computing parcels from: {bold_file}")
 
-# Load atlas
+# load atlas to mask data
 atlas = datasets.fetch_atlas_schaefer_2018(
     n_rois=n_rois,
-#    data_dir="data/atlases", ##### to modify #####
+    data_dir=atlas_dir,
     yeo_networks=yeo_networks
 )
 
-# Create masker
+# create masker of input data
 masker = NiftiLabelsMasker(
     labels_img=atlas.maps,
     standardize="zscore_sample",
     detrend=True
 )
 
-# Extract time series
-ts = masker.fit_transform(bold_file)  # shape: (T, parcels)
+# extract timeseries from parcels
+ts = masker.fit_transform(bold_file)
 
-# usare libreria logger
-# print(f"Output shape: {ts.shape}")
-
-# Save
+# save parcel timeseries
 np.save(npy_file, ts)

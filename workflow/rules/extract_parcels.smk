@@ -1,6 +1,3 @@
-#TODO add a rule to download atlas and save it in the data directory,
-#TODO if not complex to do: then use that atlas in the extract_parcels rule
-
 rule extract_parcels:
     input:
         bold=lambda wc: config["bold_glob_pattern"].format(
@@ -12,10 +9,11 @@ rule extract_parcels:
             descriptor=wc.descriptor,
         )
     output:
-        npy=f"../results/parcels/{{task}}/sub-{{subject}}_task-{{task}}_{{run_label}}_space-{{space}}_res-{{resolution}}_desc-{{descriptor}}_parcel_ts.npy"
+        npy=f"results/parcels/{{task}}/sub-{{subject}}_task-{{task}}_{{run_label}}_space-{{space}}_res-{{resolution}}_desc-{{descriptor}}_parcel_ts.npy"
     params:
         n_rois=config["atlas"]["n_rois"],
-        yeo_networks=config["atlas"]["yeo_networks"]
+        yeo_networks=config["atlas"]["yeo_networks"],
+        atlas_dir=config["atlas"]["atlas_dir"]
     conda:
         "../envs/extract_parcels_environment.yaml"
     script:

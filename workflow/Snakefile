@@ -1,11 +1,11 @@
+from pathlib import Path
+from itertools import product
+
 configfile: "config/config.yaml"
 
 include: "rules/extract_parcels.smk"
 include: "rules/compute_isc.smk"
 include: "rules/plot_isc.smk"
-
-from pathlib import Path
-from itertools import product
 
 SUBJECTS = [f"{i:03d}" for i in range(config["subjects"]["start"], config["subjects"]["end"] + 1)]
 
@@ -52,27 +52,27 @@ for c in BOLD_FILES:
 print(f"Found {len(TASK_GROUPS)} task group(s)")
 
 PARCEL_OUTPUTS = [
-    f"../results/parcels/{c['task']}/sub-{c['subject']}_task-{c['task']}_{run_label(c['run_tag'])}_space-{c['space']}_res-{c['resolution']}_desc-{c['descriptor']}_parcel_ts.npy"
+    f"results/parcels/{c['task']}/sub-{c['subject']}_task-{c['task']}_{run_label(c['run_tag'])}_space-{c['space']}_res-{c['resolution']}_desc-{c['descriptor']}_parcel_ts.npy"
     for c in BOLD_FILES
 ]
 
 ISC_NPY_OUTPUTS = [
-    f"../results/isc/task-{task}_isc_mean.npy"
+    f"results/isc/task-{task}_isc_mean.npy"
     for task in TASK_GROUPS
 ]
 
 ISC_NII_OUTPUTS = [
-    f"../results/isc/task-{task}_isc_mean.nii.gz"
+    f"results/isc/task-{task}_isc_mean.nii.gz"
     for task in TASK_GROUPS
 ]
 
 FIG_PNG_OUTPUTS = [
-    f"../results/figures/task-{task}_isc_mean.png"
+    f"results/plots/task-{task}_isc_mean.png"
     for task in TASK_GROUPS
 ]
 
 FIG_HTML_OUTPUTS = [
-    f"../results/figures/task-{task}_isc_mean.html"
+    f"results/plots/task-{task}_isc_mean.html"
     for task in TASK_GROUPS
 ]
 

@@ -1,11 +1,26 @@
 # dataset configuration
-bold_glob_pattern: "../resources/sub-{subject}/func/sub-{subject}_task-{task}{run_tag}_space-{space}_res-{resolution}_desc-{descriptor}_bold.nii.gz"
+bold_glob_pattern: "resources/fMRI_data/sub-{subject}/func/sub-{subject}_task-{task}{run_tag}_space-{space}_res-{resolution}_desc-{descriptor}_bold.nii.gz"
 subjects:
   start: 1
   end: 345
 tasks:
+  - "21styear"
+  - "black"
+  - "bronx"
+  - "forgot"
+  - "lucy"
+#  - "merlin"
+  - "notthefallintact"
+  - "notthefalllongscram"
+  - "notthefallshortscram"
   - "pieman"
-  - "tunnel"
+  - "piemanpni"
+  - "prettymouth"
+#  - "shapesphysical"
+#  - "shapessocial"
+#  - "sherlock"
+#  - "slumlordreach"
+#  - "tunnel"
 run_tags:
   - ""
   - "_run-1"
@@ -19,5 +34,6 @@ descriptors:
 
 # atlas configuration
 atlas:
+  atlas_dir: "resources/atlases"
   n_rois: 200
   yeo_networks: 7

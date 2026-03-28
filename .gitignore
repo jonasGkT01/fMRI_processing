@@ -1,3 +1,5 @@
 .env
 .snakemake/
+resources/
+results/
 workflow/envs/fMRI_processing/
