@@ -3,7 +3,6 @@ from nilearn import plotting
 # inputs/outputs from Snakemake
 isc_nii = snakemake.input["isc_nii"]
 png_file = snakemake.output["png"]
-html_file = snakemake.output["html"]
 
 task = snakemake.wildcards["task"]
 
@@ -20,8 +19,8 @@ display = plotting.plot_stat_map(
 display.savefig(png_file)
 display.close()
 
-# create and save interactive HTML plot of ISC map
-view = plotting.view_img(isc_nii, title=f"Mean ISC - Task '{task}'")
-view.save_as_html(html_file)
-
-print(f"Saved plots: {png_file}, {html_file}")
+## create and save interactive HTML plot of ISC map
+#view = plotting.view_img(isc_nii, title=f"Mean ISC - Task '{task}'")
+#view.save_as_html(html_file)
+#
+#print(f"Saved plots: {png_file}, {html_file}")

@@ -1,5 +1,9 @@
+# general configuration
+fMRI_data_dir:        "resources/fMRI_data"
+bold_glob_pattern:    "resources/fMRI_data/sub-{subject}/func/sub-{subject}_task-{task}{run_tag}_space-{space}_res-{resolution}_desc-{descriptor}_bold.nii.gz"
+scans_to_be_excluded: "resources/scan_exclude.json"
+
 # dataset configuration
-bold_glob_pattern: "resources/fMRI_data/sub-{subject}/func/sub-{subject}_task-{task}{run_tag}_space-{space}_res-{resolution}_desc-{descriptor}_bold.nii.gz"
 subjects:
   start: 1
   end: 345
@@ -9,7 +13,7 @@ tasks:
   - "bronx"
   - "forgot"
   - "lucy"
-#  - "merlin"
+  - "merlin"
   - "milkyway"
   - "notthefallintact"
   - "notthefalllongscram"
@@ -17,12 +21,12 @@ tasks:
   - "pieman"
   - "piemanpni"
   - "prettymouth"
-#  - "schema"
-#  - "shapesphysical"
-#  - "shapessocial"
-#  - "sherlock"
-#  - "slumlordreach"
-#  - "tunnel"
+  - "schema"
+  - "shapesphysical"
+  - "shapessocial"
+  - "sherlock"
+  - "slumlordreach"
+  - "tunnel"
 run_tags:
   - ""
   - "_run-1"
@@ -33,6 +37,7 @@ resolutions:
   - "native"
 descriptors:
   - "clean"
+excluded_tasks: ["merlin", "schema", "shapesphysical", "shapessocial", "sherlock", "slumlordreach"]
 
 # atlas configuration
 atlas:

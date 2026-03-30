@@ -1,5 +1,6 @@
 from pathlib import Path
 from itertools import product
+import json
 
 configfile: "config/config.yaml"
 
@@ -12,6 +13,27 @@ SUBJECTS = [f"{i:03d}" for i in range(config["subjects"]["start"], config["subje
 def run_label(run_tag):
     return "norun" if run_tag == "" else run_tag.replace("_", "")
 
+with open(config["scans_to_be_excluded"]) as f:
+    SCAN_EXCLUDE = json.load(f)
+
+def excluded_scan_prefixes(task):
+    # load dictionary and get scan prefixes to be excluded for the given task
+    task_dict = SCAN_EXCLUDE.get(task, {})
+    return {
+        prefix
+        for scans in task_dict.values()
+        for prefix in scans
+    }
+
+def scan_prefix(subject, task, run_tag):
+    prefix = f"sub-{subject}_task-{task}"
+    if  run_tag != "":
+        prefix += run_tag
+    return prefix
+
+def is_excluded(subject, task, run_tag):
+    return scan_prefix(subject, task, run_tag) in excluded_scan_prefixes(task)
+
 # discover valid inputs
 BOLD_FILES = []
 for subject, task, run_tag, space, resolution, descriptor in product(
@@ -22,6 +44,11 @@ for subject, task, run_tag, space, resolution, descriptor in product(
     config["resolutions"],
     config["descriptors"],
 ):
+    # skip excluded scans before checking the file
+    if is_excluded(subject, task, run_tag) or task in config["excluded_tasks"]:
+        print(f"Excluding scan for subject {subject}, task {task}, run {run_tag}")
+        continue
+
     bold_file = config["bold_glob_pattern"].format(
         subject=subject,
         task=task,
@@ -30,6 +57,7 @@ for subject, task, run_tag, space, resolution, descriptor in product(
         resolution=resolution,
         descriptor=descriptor,
     )
+
     if Path(bold_file).exists():
         BOLD_FILES.append({
             "subject": subject,
@@ -42,14 +70,10 @@ for subject, task, run_tag, space, resolution, descriptor in product(
             "bold_file": bold_file,
         })
 
-print(f"Found {len(BOLD_FILES)} valid BOLD file(s)")
-
 # group by task only
 TASK_GROUPS = {}
 for c in BOLD_FILES:
     TASK_GROUPS.setdefault(c["task"], []).append(c)
-
-print(f"Found {len(TASK_GROUPS)} task group(s)")
 
 PARCEL_OUTPUTS = [
     f"results/parcels/{c['task']}/sub-{c['subject']}_task-{c['task']}_{run_label(c['run_tag'])}_space-{c['space']}_res-{c['resolution']}_desc-{c['descriptor']}_parcel_ts.npy"
@@ -73,7 +97,6 @@ FIG_PNG_OUTPUTS = [
 
 rule all:
     input:
-        PARCEL_OUTPUTS,
         ISC_NPY_OUTPUTS,
         ISC_NII_OUTPUTS,
         FIG_PNG_OUTPUTS
