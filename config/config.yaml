@@ -17,7 +17,7 @@ tasks:
   - "pieman"
   - "piemanpni"
   - "prettymouth"
-  - "schema"
+#  - "schema"
 #  - "shapesphysical"
 #  - "shapessocial"
 #  - "sherlock"

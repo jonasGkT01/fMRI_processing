@@ -12,7 +12,7 @@ SUBJECTS = [f"{i:03d}" for i in range(config["subjects"]["start"], config["subje
 def run_label(run_tag):
     return "norun" if run_tag == "" else run_tag.replace("_", "")
 
-# Discover valid inputs
+# discover valid inputs
 BOLD_FILES = []
 for subject, task, run_tag, space, resolution, descriptor in product(
     SUBJECTS,
@@ -44,7 +44,7 @@ for subject, task, run_tag, space, resolution, descriptor in product(
 
 print(f"Found {len(BOLD_FILES)} valid BOLD file(s)")
 
-# Group by task only
+# group by task only
 TASK_GROUPS = {}
 for c in BOLD_FILES:
     TASK_GROUPS.setdefault(c["task"], []).append(c)
@@ -71,15 +71,9 @@ FIG_PNG_OUTPUTS = [
     for task in TASK_GROUPS
 ]
 
-FIG_HTML_OUTPUTS = [
-    f"results/plots/task-{task}_isc_mean.html"
-    for task in TASK_GROUPS
-]
-
 rule all:
     input:
         PARCEL_OUTPUTS,
         ISC_NPY_OUTPUTS,
         ISC_NII_OUTPUTS,
-        FIG_PNG_OUTPUTS,
-        FIG_HTML_OUTPUTS
+        FIG_PNG_OUTPUTS
