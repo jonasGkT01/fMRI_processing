@@ -37,7 +37,6 @@ resolutions:
   - "native"
 descriptors:
   - "clean"
-excluded_tasks: ["merlin", "schema", "shapesphysical", "shapessocial", "sherlock", "slumlordreach"]
 
 # atlas configuration
 atlas:
