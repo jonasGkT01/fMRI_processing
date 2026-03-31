@@ -25,14 +25,14 @@ atlas_data = atlas_img.get_fdata().astype(int)
 # load parcel data
 data_list = [np.load(f) for f in ts_files]
 
-# check that all parcels have the same number of timepoints
-time_lengths = [x.shape[0] for x in data_list]
-if len(set(time_lengths)) != 1:
-    details = ", ".join(
-        f"{f}: {arr.shape[0]} timepoints"
-        for f, arr in zip(ts_files, data_list)
-    )
-    raise ValueError(f"Mismatched time lengths across input files: {details}")
+## check that all parcels have the same number of timepoints
+#time_lengths = [x.shape[0] for x in data_list]
+#if len(set(time_lengths)) != 1:
+#    details = ", ".join(
+#        f"{f}: {arr.shape[0]} timepoints"
+#        for f, arr in zip(ts_files, data_list)
+#    )
+#    raise ValueError(f"Mismatched time lengths across input files: {details}")
 
 n_subjects, T, n_parcels = len(data_list), data_list[0].shape[0], data_list[0].shape[1]
 data = np.stack(data_list, axis=0)
@@ -42,8 +42,9 @@ isc = np.zeros((n_subjects, n_parcels), dtype=np.float32)
 
 for s in range(n_subjects):
     others_mean = data[np.arange(n_subjects) != s].mean(axis=0)
-
     for p in range(n_parcels):
+        # compute Pearson correlation between subject's parcel time series and mean of others, and drop p-value
+        # consider r,_ = 1 - pearsonr(data[s, :, p], others_mean[:, p]), instead
         r, _ = pearsonr(data[s, :, p], others_mean[:, p])
         isc[s, p] = np.nan_to_num(r, nan=0.0)
 

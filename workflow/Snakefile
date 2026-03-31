@@ -144,8 +144,12 @@ for subject, task, run_tag, space, resolution, descriptor in product(
 
 # group by task only
 TASK_GROUPS = {}
+TASK_GROUPS_EXCLUDE = {}
 for c in BOLD_FILES:
     TASK_GROUPS.setdefault(c["task"], []).append(c)
+    if write_length_check_json(task,parcel_outputs_for_task(task),f"results/qc/task-{task}_length_check.json"):
+        TASK_GROUPS_EXCLUDE.setdefault(c["task"], []).append(c)
+        print(f"ISC's for task {c['task']} will not be computed since not all parcel timeseries have the same length. See results/qc/task-{c['task']}_length_check.json for details.")
 
 PARCEL_OUTPUTS = [
     f"results/parcels/{c['task']}/sub-{c['subject']}_task-{c['task']}_{run_label(c['run_tag'])}_space-{c['space']}_res-{c['resolution']}_desc-{c['descriptor']}_parcel_ts.npy"
@@ -154,25 +158,22 @@ PARCEL_OUTPUTS = [
 
 ISC_NPY_OUTPUTS = [
     f"results/isc/task-{task}_isc_mean.npy"
-    for task in TASK_GROUPS
-    if write_length_check_json(task,parcel_outputs_for_task(task),f"results/qc/task-{task}_length_check.json")
+    for task in TASK_GROUPS_EXCLUDE
 ]
 
 ISC_NII_OUTPUTS = [
     f"results/isc/task-{task}_isc_mean.nii.gz"
-    for task in TASK_GROUPS
-    if write_length_check_json(task,parcel_outputs_for_task(task),f"results/qc/task-{task}_length_check.json")
+    for task in TASK_GROUPS_EXCLUDE
 ]
 
 FIG_PNG_OUTPUTS = [
     f"results/plots/task-{task}_isc_mean.png"
-    for task in TASK_GROUPS
-    if write_length_check_json(task,parcel_outputs_for_task(task),f"results/qc/task-{task}_length_check.json")
+    for task in TASK_GROUPS_EXCLUDE
 ]
 
 rule all:
     input:
-#        PARCEL_OUTPUTS,
+        PARCEL_OUTPUTS,
         ISC_NPY_OUTPUTS,
         ISC_NII_OUTPUTS,
         FIG_PNG_OUTPUTS
