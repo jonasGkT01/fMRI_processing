@@ -100,12 +100,6 @@ def write_length_check_json(task, parcel_files, output_json):
 
     return valid
 
-def parcel_outputs_for_task(task):
-    return [
-        f"results/parcels/{c['task']}/sub-{c['subject']}_task-{c['task']}_{c['run_label']}_space-{c['space']}_res-{c['resolution']}_desc-{c['descriptor']}_parcel_ts.npy"
-        for c in TASK_GROUPS[task]
-    ]
-
 # discover valid inputs
 BOLD_FILES = []
 for subject, task, run_tag, space, resolution, descriptor in product(
@@ -147,6 +141,14 @@ TASK_GROUPS = {}
 TASK_GROUPS_EXCLUDE = {}
 for c in BOLD_FILES:
     TASK_GROUPS.setdefault(c["task"], []).append(c)
+
+def parcel_outputs_for_task(task):
+    return [
+        f"results/parcels/{c['task']}/sub-{c['subject']}_task-{c['task']}_{c['run_label']}_space-{c['space']}_res-{c['resolution']}_desc-{c['descriptor']}_parcel_ts.npy"
+        for c in TASK_GROUPS[task]
+    ]
+
+for c in BOLD_FILES:
     if write_length_check_json(c["task"],parcel_outputs_for_task(c["task"]),f"results/qc/task-{c['task']}_length_check.json"):
         TASK_GROUPS_EXCLUDE.setdefault(c["task"], []).append(c)
 
