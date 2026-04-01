@@ -148,9 +148,13 @@ def parcel_outputs_for_task(task):
         for c in TASK_GROUPS[task]
     ]
 
-for c in BOLD_FILES:
-    if write_length_check_json(c["task"],parcel_outputs_for_task(c["task"]),f"results/qc/task-{c['task']}_length_check.json"):
-        TASK_GROUPS_EXCLUDE.setdefault(c["task"], []).append(c)
+for task in config["tasks"]:
+    if not write_length_check_json(task, parcel_outputs_for_task(task), f"results/qc/task-{task}_length_check.json"):
+        print(f"Warning: Length check failed for task {task}. See results/qc/task-{task}_length_check.json for details.")
+
+#for c in BOLD_FILES:
+#    if write_length_check_json(c["task"],parcel_outputs_for_task(c["task"]),f"results/qc/task-{c['task']}_length_check.json"):
+#        TASK_GROUPS_EXCLUDE.setdefault(c["task"], []).append(c)
 
 PARCEL_OUTPUTS = [
     f"results/parcels/{c['task']}/sub-{c['subject']}_task-{c['task']}_{run_label(c['run_tag'])}_space-{c['space']}_res-{c['resolution']}_desc-{c['descriptor']}_parcel_ts.npy"
@@ -159,17 +163,17 @@ PARCEL_OUTPUTS = [
 
 ISC_NPY_OUTPUTS = [
     f"results/isc/task-{task}_isc_mean.npy"
-    for task in TASK_GROUPS_EXCLUDE
+    for task in TASK_GROUPS
 ]
 
 ISC_NII_OUTPUTS = [
     f"results/isc/task-{task}_isc_mean.nii.gz"
-    for task in TASK_GROUPS_EXCLUDE
+    for task in TASK_GROUPS
 ]
 
 FIG_PNG_OUTPUTS = [
     f"results/plots/task-{task}_isc_mean.png"
-    for task in TASK_GROUPS_EXCLUDE
+    for task in TASK_GROUPS
 ]
 
 rule all:

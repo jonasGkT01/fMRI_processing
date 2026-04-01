@@ -25,16 +25,19 @@ atlas_data = atlas_img.get_fdata().astype(int)
 # load parcel data
 data_list = [np.load(f) for f in ts_files]
 
-## check that all parcels have the same number of timepoints
-#time_lengths = [x.shape[0] for x in data_list]
-#if len(set(time_lengths)) != 1:
+# check that all parcels have the same number of timepoints; if not, trim to the minimum number of timepoints across all files
+time_lengths = [x.shape[0] for x in data_list]
+if len(set(time_lengths)) != 1:
+    minimum_time = min(time_lengths)
+    data_list = [x[:minimum_time, :] for x in data_list]
 #    details = ", ".join(
 #        f"{f}: {arr.shape[0]} timepoints"
 #        for f, arr in zip(ts_files, data_list)
 #    )
 #    raise ValueError(f"Mismatched time lengths across input files: {details}")
 
-n_subjects, T, n_parcels = len(data_list), data_list[0].shape[0], data_list[0].shape[1]
+#T = minimum_time
+n_subjects, n_parcels = len(data_list), data_list[0].shape[1]
 data = np.stack(data_list, axis=0)
 
 # compute leave-one-out ISC
