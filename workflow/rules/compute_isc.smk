@@ -1,6 +1,3 @@
-#TODO add numpy vector for each parcel
-#TODO check if the average is computed over parcels or over voxels
-
 def task_parcel_inputs(wc):
     items = TASK_GROUPS[wc.task]
     return [
