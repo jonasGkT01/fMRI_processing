@@ -24,7 +24,7 @@ atlas = datasets.fetch_atlas_schaefer_2018(
 masker = NiftiLabelsMasker(
     labels_img=atlas.maps,
     standardize="zscore_sample",
-    detrend=True
+    detrend=False
 )
 
 # extract timeseries from parcels
