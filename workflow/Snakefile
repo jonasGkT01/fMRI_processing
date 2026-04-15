@@ -112,7 +112,7 @@ for subject, task, run_tag, space, resolution, descriptor in product(
 ):
     # skip excluded scans before checking the file
     if is_excluded(subject, task, run_tag):
-        #print(f"Excluding scan for subject {subject}, task {task}, run {run_tag}")
+        # print(f"Excluding scan for subject {subject}, task {task}, run {run_tag}")
         continue
 
     bold_file = config["bold_glob_pattern"].format(
@@ -136,10 +136,16 @@ for subject, task, run_tag, space, resolution, descriptor in product(
             "bold_file": bold_file,
         })
 
+def task_is_excluded(task):
+    return task in config["schema_subtasks"] or task in config["notthefall_variants"]
+
 # group by task only
 TASK_GROUPS = {}
-TASK_GROUPS_EXCLUDE = {}
 for c in BOLD_FILES:
+    # skip schema subtasks and notthefall variants
+    if task_is_excluded(c["task"]):
+        continue
+        
     TASK_GROUPS.setdefault(c["task"], []).append(c)
 
 def parcel_outputs_for_task(task):
@@ -148,13 +154,34 @@ def parcel_outputs_for_task(task):
         for c in TASK_GROUPS[task]
     ]
 
+excluded_scans_for_task = []
 for task in config["tasks"]:
-    if not write_length_check_json(task, parcel_outputs_for_task(task), f"results/qc/task-{task}_length_check.json"):
-        print(f"Warning: Length check failed for task {task}. See results/qc/task-{task}_length_check.json for details.")
+    if task_is_excluded(task):
+        print(f"Skipping length check for excluded task {task}. See {config['excluded_scans_for_task']} for details.")
+        if task in config["schema_subtasks"]:
+            for c in TASK_GROUPS.get(task, []):
+                excluded_scans_for_task.append({
+                    "task": task,
+                    "reason": "Excluded because it is a schema subtask.",
+                    "bold_file": c["bold_file"],
+                })
+        elif task in config["notthefall_variants"]:
+            for c in TASK_GROUPS.get(task, []):
+                excluded_scans_for_task.append({
+                    "task": task,
+                    "reason": "Excluded because it is a notthefall variant.",
+                    "bold_file": c["bold_file"],
+                })
+        continue
 
-#for c in BOLD_FILES:
-#    if write_length_check_json(c["task"],parcel_outputs_for_task(c["task"]),f"results/qc/task-{c['task']}_length_check.json"):
-#        TASK_GROUPS_EXCLUDE.setdefault(c["task"], []).append(c)
+        if not write_length_check_json(task, parcel_outputs_for_task(task), f"results/qc/task-{task}_length_check.json"):
+            print(f"Warning: Length check failed for task {task}. See results/qc/task-{task}_length_check.json for details.")
+
+excluded_scans_for_task_path = Path(config["excluded_scans_for_task"])
+excluded_scans_for_task_path.parent.mkdir(parents=True, exist_ok=True)
+
+with open(config["excluded_scans_for_task"], "w") as f:
+    json.dump(excluded_scans_for_task, f, indent=2, sort_keys=True)
 
 PARCEL_OUTPUTS = [
     f"results/parcels/{c['task']}/sub-{c['subject']}_task-{c['task']}_{run_label(c['run_tag'])}_space-{c['space']}_res-{c['resolution']}_desc-{c['descriptor']}_parcel_ts.npy"
