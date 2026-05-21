@@ -159,23 +159,25 @@ for task in config["tasks"]:
     if task_is_excluded(task):
         print(f"Skipping length check for excluded task {task}. See {config['excluded_scans_for_task']} for details.")
         if task in config["schema_subtasks"]:
-            for c in TASK_GROUPS.get(task, []):
-                excluded_scans_for_task.append({
-                    "task": task,
-                    "reason": "Excluded because it is a schema subtask.",
-                    "bold_file": c["bold_file"],
-                })
+            reason = "Excluded because it is a schema subtask."
         elif task in config["notthefall_variants"]:
-            for c in TASK_GROUPS.get(task, []):
+            reason = "Excluded because it is a notthefall variant."
+        else:
+            reason = "Excluded for unspecified reason."
+        for c in BOLD_FILES:
+            if c["task"] == task:
                 excluded_scans_for_task.append({
                     "task": task,
-                    "reason": "Excluded because it is a notthefall variant.",
+                    "reason": reason,
                     "bold_file": c["bold_file"],
                 })
         continue
 
-        if not write_length_check_json(task, parcel_outputs_for_task(task), f"results/qc/task-{task}_length_check.json"):
-            print(f"Warning: Length check failed for task {task}. See results/qc/task-{task}_length_check.json for details.")
+    if task not in TASK_GROUPS:
+        print(f"Warning: No valid BOLD files found for task {task}. Skipping length check.")
+        continue
+    if not write_length_check_json(task, parcel_outputs_for_task(task), f"results/qc/task-{task}_length_check.json"):
+        print(f"Warning: Length check failed for task {task}. See results/qc/task-{task}_length_check.json for details.")
 
 excluded_scans_for_task_path = Path(config["excluded_scans_for_task"])
 excluded_scans_for_task_path.parent.mkdir(parents=True, exist_ok=True)
